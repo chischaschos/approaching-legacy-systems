@@ -13,7 +13,18 @@
         font-family: 'Yanone Kaffeesatz';
         font-weight: normal;
       }
-      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .remark-code,
+      .remark-inline-code {
+        font-family: 'Ubuntu Mono';
+      }
+      .left-column {
+        width: 50%;
+        float: left;
+      }
+      .right-column {
+        width: 50%;
+        float: right;
+      }
     </style>
   </head>
 
@@ -34,10 +45,15 @@ My name is Emmanuel Delgado, I am a Software Developer and I currently work for 
 
 # Agenda
 
-1. Set a context
-2. Adopt a few core ideas
-3. Initial approach
-4. Look for documentation
+0. Set a context
+0. Adopt a few core ideas
+0. Just look at your files
+0. Become a Git historian
+0. Look for documentation
+0. Understand your dependencies
+0. Get some metrics
+0. Understand your tests
+0. Consider extracting features
 
 ???
 This is how the general talk is gonna go, it will take around 20 mins, with a mix of ideas, stories,
@@ -289,6 +305,116 @@ Here are a few things to keep in mind:
 ???
 - One common problem for systems that have been alive for a few years and sometimes even younger systems is that every new developer.
 - New designs on top of the existing ones without refactoring, then they get bored or leave and now we have new designs on top of the older ones.
+---
+
+# 5. Understand your dependencies
+One way to help you understand the architecture is to understand the dependencies. Let's
+start with your *Gemfile*:
+```ruby
+source 'https://rubygems.org'
+
+ruby '2.0.0'
+
+gem 'rails', '~>3.2.17'
+
+gem 'active_presenter'
+gem 'activemerchant', '~>1.42'
+gem 'ancestry', '>=1.2.4'
+gem 'acts-as-taggable-on', '~> 3.4.2'
+gem 'ambethia-smtp-tls', '1.1.2', :require => 'smtp-tls'
+gem 'american_date'
+gem 'aws-sdk'
+gem 'bitly'
+gem 'braintree', '2.32.1'
+gem 'yajl-ruby'
+gem 'chronic'
+gem 'curb'
+gem 'haml-rails'
+gem 'haml-contrib' # we need this for the Textile filter, that was moved out of core HAML
+gem 'simple_form' #, github: 'plataformatec/simple_form', branch: 'v2.2' # admin dependency
+...
+```
+---
+A naive filter would give me a better idea:
+```bash
+$ ag -o "\'[\w-]+\'" Gemfile \
+  | tr "'" " " \
+  | sort \
+  | wc
+     188     188    2675
+```
+.left-column[
+  ```bash
+  $ ag -o "\'[\w-]+\'" Gemfile \
+    | tr "'" " " \
+    | sort
+   activemerchant
+   activerecord-import
+   activerecord-nulldb-adapter
+   acts-as-taggable-on
+   acts_as_list
+   addressable
+   airbrake
+   ambethia-smtp-tls
+   american_date
+   ancestry
+   ap
+   awesome_nested_set
+   awesome_print
+   aws-sdk
+   bartt-ssl_requirement
+   better_errors
+   bitly
+   braintree
+   builder
+  ```
+ ]
+
+.right-colum[
+  ```bash
+   capistrano
+   capistrano-ext
+   capybara
+   capybara-screenshot
+   capybara-webkit
+   chronic
+   codeclimate-test-reporter
+   colorize
+   compass
+   compass-rails
+   connection_pool
+   cookie_slasher
+   cucumber-rails
+   curb
+   ...
+   typhoeus
+   validates_timeliness
+   vcr
+   will_paginate
+   yajl-ruby
+   zendesk_remote_auth
+   zip-code-info
+  ```
+]
+
+---
+- This is also a good opportunity to get familiar with new libraries that potentially
+you will have to learn.
+- You could also look for the *require* statements:
+  ```bash
+  $ ag 'require' --ruby --ignore-dir app/views app lib
+  ```
+- This is too manual, try [rubrowser](http://www.blazeboy.me/rubrowser/)
+![](./sg-rubrowser.gif)
+
+???
+- Pending what do you understand from rubrowser?
+---
+
+# 6. Get some metrics
+
+
+
 
 
 
