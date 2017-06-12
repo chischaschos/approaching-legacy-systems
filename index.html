@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Approaching a Legacy System</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+    </style>
+  </head>
+
+  <body>
+   <!-- [NOTE]: Note that you need active internet connection to access remark.js script file -->
+   <textarea id="source">
+
+class: center, middle
+
+# Approaching a Legacy System
+
+by Emmanuel Delgado
+
+???
+My name is Emmanuel Delgado, I am a Software Developer and I currently work for modcloth.com.
+---
+
+
+# Agenda
+
+1. Set a context
+2. Adopt a few core ideas
+3. Initial approach
+4. Look for documentation
+
+???
+This is how the general talk is gonna go, it will take around 20 mins, with a mix of ideas, stories,
+and tools/code.
+---
+
+
+# 1. Set a context
+
+--
+
+## Wikipedia definition
+> In computing, a legacy system is an **old** method, **technology**, **computer system**, or **application program**, "of, relating to, or being a previous or **outdated computer system**." Often a pejorative term, referencing a system as "legacy" means that it paved the way for the standards that would follow it. This can also imply that the system is out of date or **in need of replacement.**
+
+--
+- Old
+- Technology
+- Computer System
+- Application Program
+- Outdated computer system
+- In need of replacement
+
+???
+- What is a Legacy System?
+---
+
+# 2. Adopt a few core ideas
+
+- Curiosity
+--
+
+- Assess risk
+--
+
+- Fear and courage
+--
+
+- Ensure safety harnesses
+--
+
+- Ask questions
+--
+
+- Experiment
+--
+
+- Take notes
+
+???
+- Curiosity need to be your driven force
+- You can not move without assessing Risk first
+- Don't move without safety harnesses
+- Ask questions to yourself, and everyone who may know about the system
+- Fear is ok
+---
+
+# 3. Initial approach
+Just look at the files:
+```bash
+$ ls
+Capfile              README.md            config.ru            public
+Gemfile              Rakefile             db                   script
+Gemfile.lock         Vagrantfile          doc                  spec
+Guardfile            app                  features             spec.acceptance
+Procfile             certs                lib                  vendor
+Procfile.development config               log
+```
+
+```bash
+$ ls app
+assets      helpers     middleware  presenters  stylesheets
+controllers jobs        models      services    views
+```
+---
+
+Look deeper:
+```bash
+$ tree app lib
+lib
+├── abstract_methods.rb
+├── activate_toggle_switch.rb
+├── active_merchant
+│   └── billing
+│       ├── braintree_mod_gateway.rb
+│       └── gateways
+│           └── modcloth_bogus.rb
+├── active_record_extensions.rb
+├── active_record_selective_error_presenter.rb
+├── active_shipping
+│   ├── active_shipping
+│   │   ├── lib
+│   │   │   ├── country.rb
+│   │   │   ├── error.rb
+...
+└── wsdl
+    ├── ShipServiceDevelopment_v9.wsdl
+    ├── ShipServiceDevelopment_v9.wsdl.bak
+    ├── ShipServiceProduction_v9.wsdl
+    └── ShipServiceProduction_v9.wsdl.bak
+
+504 directories, 3052 files
+```
+---
+
+Looks like rails and ruby so, how much ruby?:
+```bash
+$ ag -l 'class|module' --ruby | wc
+  3227    3227  157092
+```
+--
+
+How much ruby in *lib* and *app*?:
+```bash
+$ ag -l 'class|module' --ruby  app lib |wc
+  1836    1836   79395
+```
+--
+
+How many files types are there [thank you stackoverflow](https://stackoverflow.com/questions/1842254/how-can-i-find-all-of-the-distinct-file-extensions-in-a-folder-hierarchy)?
+```bash
+$ find . -type f \
+  | sed -e 's/.*\.//' \
+  | sed -e 's/.*\///' \
+  | sort | uniq -c | sort -rn| wc
+     217     434    3881
+```
+---
+
+Top counts:
+```bash
+$ find . -type f \
+  | sed -e 's/.*\.//' \
+  | sed -e 's/.*\///' \
+  |head -n10
+3579 rb
+1634 png
+ 829 js
+ 775 erb
+ 586 gif
+ 547 jpg
+ 511 haml
+ 372 scss
+ 248 gem
+ 124 css
+  81 feature
+  77 rake
+  58 csv
+  52 yml
+  41 html
+  39 htm
+  38 xml
+  17 svg
+  16 woff
+  16 ttf
+```
+---
+
+# What have we learned so far?
+- Rails
+- 3K~ ruby files
+- 1K~ frontend related files
+---
+
+# 4. Become a Git historian
+```bash
+$ brew upgrade git-extras
+Error: git-extras 4.3.0 already installed
+$ git summary
+git summary |more
+
+ project  : e-comm
+ repo age : 9 years
+ active   : 2420 days
+ commits  : 42828
+ files    : 9942
+ authors  :
+  1806  Person 1  4.2%
+  1566  Person 2  3.7%
+  1431  Person 3  3.3%
+  1218  Person 4  2.8%
+  1072  Person 5  2.5%
+   962  Person 6  2.2%
+   878  Person 7  2.1%
+   729  Person 8  1.7%
+   717  Person 9  1.7%
+   711  Person 10 1.7%
+   674  Person 11 1.6%
+```
+---
+
+Aggregating the results a little bit:
+```bash
+git summary \
+  | ag -o '[a-zA-Z\s]+' \
+  | tr '[:upper:]' '[:lower:]' \
+  | ag -o '\w+(\s\w+)?' \
+  | sort | uniq| wc
+     325     522    3715
+```
+
+- You can also go to github in case it is stored in github
+- Or use the cool https://github.com/IonicaBizau/git-stats
+---
+
+# What have we learned so far?
+- Rails
+- 3K~ ruby files
+- 1K~ frontend related files
+- 9 years
+- ~9K git tracked files
+- ~300 different devs
+---
+
+# 4. Look for documentation
+We learned about how big the code base is, as we look for documentation this are somethings
+that you may want to understand:
+- Is there any documentation at all?
+- Is there good commentary on the code?
+- Does the names of things make sense?
+- Are the system use cases are documented?
+- Is someone in the team that understand the system?
+---
+
+Seems that we have a *doc* folder:
+```bash
+$ git whatchanged doc
+commit d2968ae8573095ed32676f11dbc3a97d77d0549d
+Author: Person X
+Date:   Wed Jun 11 12:58:30 2014 -0400
+
+    [SB] Delete random file?
+
+:100644 000000 ab1b12981e... 0000000000... D    doc/obsolete/BCREC.csv
+```
+
+Last document modified on 2014, so it's time to start your documentation.
+--
+
+- Document every finding, clean up later
+- Keep documentation close to the code, simple is better.
+
+---
+Here are a few things to keep in mind:
+
+- You must understand the design/architecture.
+- Most of the times you don't come back and refactor.
+- Be careful about redesigning without refactor.
+
+???
+- One common problem for systems that have been alive for a few years and sometimes even younger systems is that every new developer.
+- New designs on top of the existing ones without refactoring, then they get bored or leave and now we have new designs on top of the older ones.
+
+
+
+
+
+
+
+
+
+
+    </textarea>
+    <script src="https://remarkjs.com/downloads/remark-latest.min.js" type="text/javascript">
+    </script>
+    <script type="text/javascript">
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
