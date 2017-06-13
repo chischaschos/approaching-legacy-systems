@@ -39,21 +39,21 @@ class: center, middle
 by Emmanuel Delgado
 
 ???
-My name is Emmanuel Delgado, I am a Software Developer and I currently work for modcloth.com.
+My name is Emmanuel Delgado, I am a Software Developer and I work for modcloth.com.
 ---
 
 
 # Agenda
 
-0. Set a context
-0. Adopt a few core ideas
-0. Just look at your files
-0. Become a Git historian
-0. Look for documentation
-0. Understand your dependencies
-0. Get some metrics
-0. Understand your tests
-0. Consider extracting features
+1. Definition
+2. Just look at the files
+3. Become a Git historian
+4. Look for documentation
+5. Understand your dependencies
+6. The daily boy scout
+7. Static analysis tools
+8. Understand your tests
+9. Adopt a few core ideas
 
 ???
 This is how the general talk is gonna go, it will take around 20 mins, with a mix of ideas, stories,
@@ -61,14 +61,11 @@ and tools/code.
 ---
 
 
-# 1. Set a context
-
---
+# 1. Definition
 
 ## Wikipedia definition
 > In computing, a legacy system is an **old** method, **technology**, **computer system**, or **application program**, "of, relating to, or being a previous or **outdated computer system**." Often a pejorative term, referencing a system as "legacy" means that it paved the way for the standards that would follow it. This can also imply that the system is out of date or **in need of replacement.**
 
---
 - Old
 - Technology
 - Computer System
@@ -80,38 +77,7 @@ and tools/code.
 - What is a Legacy System?
 ---
 
-# 2. Adopt a few core ideas
-
-- Curiosity
---
-
-- Assess risk
---
-
-- Fear and courage
---
-
-- Ensure safety harnesses
---
-
-- Ask questions
---
-
-- Experiment
---
-
-- Take notes
-
-???
-- Curiosity need to be your driven force
-- You can not move without assessing Risk first
-- Don't move without safety harnesses
-- Ask questions to yourself, and everyone who may know about the system
-- Fear is ok
----
-
-# 3. Initial approach
-Just look at the files:
+# 2. Just look at the files
 ```bash
 $ ls
 Capfile              README.md            config.ru            public
@@ -211,13 +177,7 @@ $ find . -type f \
 ```
 ---
 
-# What have we learned so far?
-- Rails
-- 3K~ ruby files
-- 1K~ frontend related files
----
-
-# 4. Become a Git historian
+# 3. Become a Git historian
 ```bash
 $ brew upgrade git-extras
 Error: git-extras 4.3.0 already installed
@@ -258,13 +218,54 @@ git summary \
 - Or use the cool https://github.com/IonicaBizau/git-stats
 ---
 
-# What have we learned so far?
-- Rails
-- 3K~ ruby files
-- 1K~ frontend related files
-- 9 years
-- ~9K git tracked files
-- ~300 different devs
+## Understand change on single objects
+```bash
+$ git log -patch --stat Gemfile
+commit ae961aee1ec7502f14f94e938b93c2b031547e39
+Author: x <x@place>
+Date:   Fri Jan 20 18:58:54 2017 -0600
+
+WIP
+---
+Gemfile | 1 +
+1 file changed, 1 insertion(+)
+
+diff --git a/Gemfile b/Gemfile
+index 507ae3f1ee..3fa2eec31a 100644
+--- a/Gemfile
++++ b/Gemfile
+@@ -28,6 +28,7 @@ gem 'rpm_contrib'
+gem 'newrelic_rpm'
+gem 'mongrel', '>=1.0.2.pre2'
+gem 'mysql2', '0.3.17' # above 0.3.16 because of https://github.com/brianmario/mysql2/issues/711#issuecomment-163438185
++gem 'net-sftp'
+gem 'nokogiri'
+gem 'oauth-plugin', '~> 0.4.1' # Need to specify the version or bundler will install an old one.
+gem 'packet', '0.1.15'
+
+commit e7237329cd0c0629b660697bcdf69e9328258e54
+Author: Jorge X <x@place.com>
+Date:   Fri Aug 19 13:51:19 2016 -0700
+
+Update mc-fedex gem
+---
+Gemfile | 2 +-
+1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Gemfile b/Gemfile
+index 945873cd20..507ae3f1ee 100644
+--- a/Gemfile
++++ b/Gemfile
+@@ -56,7 +56,7 @@ gem 'resque-retry'
+gem 'redis', '~> 3'
+gem 'will_paginate'
+gem 'mc-settings', '0.1.6'
+-gem 'mc-fedex', '0.2.0'
++gem 'mc-fedex', git: 'https://7650f1f2b178ebdbcb4e8bee50414500036c1720@github.com/modcloth/mc-fedex.git'
+gem 'mc-taxonomy'
+gem 'typhoeus'
+gem 'compass'
+```
 ---
 
 # 4. Look for documentation
@@ -292,12 +293,10 @@ Date:   Wed Jun 11 12:58:30 2014 -0400
 Last document modified on 2014, so it's time to start your documentation.
 --
 
-- Document every finding, clean up later
-- Keep documentation close to the code, simple is better.
-
----
 Here are a few things to keep in mind:
 
+- Document every finding, clean up later
+- Keep documentation close to the code, simple is better.
 - You must understand the design/architecture.
 - Most of the times you don't come back and refactor.
 - Be careful about redesigning without refactor.
@@ -398,32 +397,247 @@ $ ag -o "\'[\w-]+\'" Gemfile \
 ]
 
 ---
-- This is also a good opportunity to get familiar with new libraries that potentially
-you will have to learn.
-- You could also look for the *require* statements:
-  ```bash
-  $ ag 'require' --ruby --ignore-dir app/views app lib
-  ```
-- This is too manual, try [rubrowser](http://www.blazeboy.me/rubrowser/)
+This is too manual, try [rubrowser](http://www.blazeboy.me/rubrowser/)
 ![](./sg-rubrowser.gif)
 
 ???
 - Pending what do you understand from rubrowser?
 ---
 
-# 6. Get some metrics
+# 6. The daily boy scout
+I heard it from [Uncle Bob](http://programmer.97things.oreilly.com/wiki/index.php/The_Boy_Scout_Rule):
+
+> Always leave the campground cleaner than you found it.
+---
 
 
+# 7. Static analysis tools
+There is [metric_fu](https://github.com/metricfu/metric_fu), but let's take a look to only a few of its tools, plus my favorite [rubocop](https://github.com/bbatsov/rubocop) and as a bonus [unused](https://github.com/joshuaclayton/unused).
 
+- churn
+- reek
+- code_metrics
+- [rubocop](https://github.com/bbatsov/rubocop)
+- [unused](https://github.com/joshuaclayton/unused)
+---
 
+## churn
+> High method and class churn has been shown to have increased bug and error rates ...
 
+```bash
+$ churn
 
+Files
++-------------------------------------------------------+---------------+
+| file_path                                             | times_changed |
++-------------------------------------------------------+---------------+
+| ...o_inventory_snapshot_job.rb                        | 10            |
+| ...duct_manager/sync_for_new_or_updated_products.rb   | 7             |
+| ...oduct.rb                                           | 6             |
+| ...s.rake                                             | 6             |
 
+Methods
++----------------+--------------------+------------+---------------+
+| file           | klass              | method     | times_changed |
++----------------+--------------------+------------+---------------+
+| app/controg... | ProductsController | ..#create  | 7             |
 
+Classes
++-------------------------------------+---------------+---------------+
+| file                                | klass|        | times_changed |
++-------------------------------------+---------------_---------------+
+| ...c_for_new_or_updated_products.rb | SyncForNewO...| 10            |
+| ...shot_job.rb                      | ZeroInvento...| 10            |
+| ...v_categories_controller.rb       | SiteNavCate...| 8             |
+```
+---
 
+## reek
+> Reek is a tool that examines Ruby classes, modules and methods and reports any code smells it finds.
+```bash
+$ reek --format json app/models/wishlist.rb
+```
+```json
+  {
+    "context": "Wishlist#last_added_product",
+    "lines": [
+      63,
+      63
+    ],
+    "message": "calls 'items.last_added' 2 times",
+    "smell_type": "DuplicateMethodCall",
+    "source": "app/models/wishlist.rb",
+    "name": "items.last_added",
+    "count": 2,
+    "wiki_link": "https://github.com/troessner/reek/blob/master/docs/Duplicate-Method-Call.md"
+  },
+  {
+    "context": "Wishlist#move_to_cart",
+    "lines": [
+      26,
+      28,
+      32
+    ],
+    "message": "refers to 'cart' more than self (maybe move it to another class?)",
+    "smell_type": "FeatureEnvy",
+    "source": "app/models/wishlist.rb",
+    "name": "cart",
+    "wiki_link": "https://github.com/troessner/reek/blob/master/docs/Feature-Envy.md"
+  },
+```
+---
 
+You could quickly look for what code smells there are in a bunch of files, just to see how
+stinky the code base is:
+```bash
+$ reek --format json app/models | jq '.[] .smell_type'| sort | uniq
+"Attribute"
+"BooleanParameter"
+"ClassVariable"
+"ControlParameter"
+"DataClump"
+"DuplicateMethodCall"
+"FeatureEnvy"
+"InstanceVariableAssumption"
+"IrresponsibleModule"
+"LongParameterList"
+"ManualDispatch"
+"NestedIterators"
+"NilCheck"
+"PrimaDonnaMethod"
+"RepeatedConditional"
+"TooManyConstants"
+"TooManyInstanceVariables"
+"TooManyMethods"
+"TooManyStatements"
+"UncommunicativeMethodName"
+"UncommunicativeParameterName"
+"UncommunicativeVariableName"
+"UnusedParameters"
+"UtilityFunction"
+```
 
+---
 
+## code_metrics
+> rake stats is great for looking at statistics on your code, displaying things like KLOCs (thousands of lines of code) and your code to test ratio.
+```bash
+code_metrics
++----------------------+-------+-------+---------+---------+-----+-------+
+| Name                 | Lines |   LOC | Classes | Methods | M/C | LOC/M |
++----------------------+-------+-------+---------+---------+-----+-------+
+| Controllers          |  1382 |  1069 |      37 |     173 |   4 |     4 |
+| Helpers              |   122 |    99 |       0 |      16 |   0 |     4 |
+| Models               |  2077 |  1480 |      38 |     202 |   5 |     5 |
+| Mailers              |     0 |     0 |       0 |       0 |   0 |     0 |
+| Javascripts          |  7941 |  6199 |       0 |     921 |   0 |     4 |
+| Libraries            |   706 |   537 |       6 |      82 |  13 |     4 |
++----------------------+-------+-------+---------+---------+-----+-------+
+| Total                | 12228 |  9384 |      81 |    1394 |  17 |     4 |
++----------------------+-------+-------+---------+---------+-----+-------+
+  Code LOC: 9384     Test LOC: 0     Code to Test Ratio: 1:0.0
+```
+---
+
+## rubocop
+> RuboCop is a Ruby static code analyzer. Out of the box it will enforce many of the guidelines outlined in the community [Ruby Style Guide](https://github.com/bbatsov/ruby-style-guide).
+```bash
+$ rubocop --format json app/models > rubocop.json
+```
+```json
+{
+  "metadata": {
+  // omitted for brevity
+  },
+  "files": [
+    {
+      "path": "app/models/access_token.rb",
+      "offenses": [
+        {
+          "severity": "convention",
+          "message": "Prefer the new style validations `validates :column, presence: value` over `validates_presence_of`.",
+          "cop_name": "Rails/Validation",
+          "corrected": null,
+          "location": {
+            "line": 2,
+            "column": 3,
+            "length": 21
+          }
+        },
+        {
+          "severity": "convention",
+          "message": "Do not use `Time.now` without zone. Use one of `Time.zone.now`, `Time.current`, `Time.now.in_time_zone`, `Time.now.utc`, `Time.now.getlocal`, `Time.now.iso8601`, `Time.now.jisx0301`, `Time.now.rfc3339`, `Time.now.to_i`, `Time.now.to_f` instead. (https://github.com/bbatsov/rails-style-guide#time, http://danilenko.org/2012/7/6/rails_timezones)",
+          "cop_name": "Rails/TimeZone",
+          "corrected": null,
+          "location": {
+            "line": 14,
+            "column": 31,
+            "length": 3
+          }
+        }
+      ]
+    },
+```
+---
+
+Again we could get all the severities for researching purposes:
+```bash
+$ cat rubocop.json | jq '.files[].offenses[].severity' | sort | uniq -c
+7380 "convention"
+ 215 "warning"
+```
+---
+
+## Bonus: unused
+```bash
+lib/acts_as_customizable
+     custom_field_values=        ...able/acts_as_customizable.rb    occurs once
+     custom_value_for            ...able/acts_as_customizable.rb    occurs once
+
+lib/acts_as_linkable
+     find_linkable               .../link.rb                        occurs once
+     find_links_for              .../acts_as_linkable.rb            occurs once
+     find_links_for_linkable     .../link.rb                        occurs once
+     linked_by_type              .../acts_as_linkable.rb            occurs once
+     to_icon                     .../link.rb                        occurs once
+
+lib/acts_as_noteable
+     find_notes_by_user          .../acts_as_noteable.rb            occurs once
+     find_notes_for              .../acts_as_noteable.rb            occurs once
+
+lib/acts_as_urlnameable
+     all_urlnames                ...ble/acts_as_urlnameable.rb      occurs once
+     find_all_by_urlname         ...ble/acts_as_urlnameable.rb      occurs once
+
+lib/acts_as_voteable
+     users_who_voted             .../acts_as_voteable.rb            occurs once
+     votes_against_percentage    .../acts_as_voteable.rb            occurs once
+     votes_for_percentage        .../acts_as_voteable.rb            occurs once
+     votes_not_sure_percentage   .../acts_as_voteable.rb            occurs once
+```
+---
+
+# 8. Understand your tests
+
+# 9. Adopt a few core ideas
+- Curiosity
+- Assess risk
+- Fear and courage
+- Ensure safety harnesses
+- Ask questions
+- Experiment
+- Take notes
+- The boy scout rule
+
+???
+- Curiosity need to be your driven force
+- You can not move without assessing Risk first
+- Don't move without safety harnesses
+- Ask questions to yourself, and everyone who may know about the system
+- Fear is ok
+---
+
+# Thank you
 
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js" type="text/javascript">
