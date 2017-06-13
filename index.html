@@ -25,6 +25,24 @@
         width: 50%;
         float: right;
       }
+      blockquote {
+        background: #f9f9f9;
+        border-left: 10px solid #ccc;
+        margin: 1.5em 10px;
+        padding: 0.5em 10px;
+        quotes: "\201C""\201D""\2018""\2019";
+      }
+      blockquote:before {
+        color: #ccc;
+        content: open-quote;
+        font-size: 4em;
+        line-height: 0.1em;
+        margin-right: 0.25em;
+        vertical-align: -0.4em;
+      }
+      blockquote p {
+        display: inline;
+      }
     </style>
   </head>
 
@@ -49,11 +67,12 @@ My name is Emmanuel Delgado, I am a Software Developer and I work for modcloth.c
 2. Just look at the files
 3. Become a Git historian
 4. Look for documentation
-5. Understand your dependencies
+5. Understand your boundaries
 6. The daily boy scout
 7. Static analysis tools
 8. Understand your tests
-9. Adopt a few core ideas
+9. Extract features
+10. Adopt a few core ideas
 
 ???
 This is how the general talk is gonna go, it will take around 20 mins, with a mix of ideas, stories,
@@ -77,7 +96,18 @@ and tools/code.
 - What is a Legacy System?
 ---
 
+# Get ready for an archeology trip
+> Start writing down notes of everything you are learning
+
+- It does not have to be a book, keywords may be enough
+- Mind maps are great
+---
+
 # 2. Just look at the files
+> Look for clues on what the domain knowledge looks like
+
+--
+
 ```bash
 $ ls
 Capfile              README.md            config.ru            public
@@ -87,6 +117,7 @@ Guardfile            app                  features             spec.acceptance
 Procfile             certs                lib                  vendor
 Procfile.development config               log
 ```
+--
 
 ```bash
 $ ls app
@@ -153,7 +184,8 @@ Top counts:
 $ find . -type f \
   | sed -e 's/.*\.//' \
   | sed -e 's/.*\///' \
-  |head -n10
+  | sort | uniq -c | sort -rn
+  | head -n10
 3579 rb
 1634 png
  829 js
@@ -269,13 +301,13 @@ gem 'compass'
 ---
 
 # 4. Look for documentation
-We learned about how big the code base is, as we look for documentation this are somethings
-that you may want to understand:
+As we look for documentation keep in mind:
+
 - Is there any documentation at all?
 - Is there good commentary on the code?
 - Does the names of things make sense?
 - Are the system use cases are documented?
-- Is someone in the team that understand the system?
+- Is there someone in the team that understand the system?
 ---
 
 Seems that we have a *doc* folder:
@@ -290,24 +322,24 @@ Date:   Wed Jun 11 12:58:30 2014 -0400
 :100644 000000 ab1b12981e... 0000000000... D    doc/obsolete/BCREC.csv
 ```
 
-Last document modified on 2014, so it's time to start your documentation.
+> Last document modified on 2014, so it's time to start your documentation.
+
 --
 
 Here are a few things to keep in mind:
 
-- Document every finding, clean up later
+- Document everything you learn.
 - Keep documentation close to the code, simple is better.
 - You must understand the design/architecture.
-- Most of the times you don't come back and refactor.
-- Be careful about redesigning without refactor.
+- Once you understand something refine it's documentation.
 
 ???
 - One common problem for systems that have been alive for a few years and sometimes even younger systems is that every new developer.
 - New designs on top of the existing ones without refactoring, then they get bored or leave and now we have new designs on top of the older ones.
 ---
 
-# 5. Understand your dependencies
-One way to help you understand the architecture is to understand the dependencies. Let's
+# 5. Understand your boundaries
+One way to help you understand the architecture is to understand the boundaries. Let's
 start with your *Gemfile*:
 ```ruby
 source 'https://rubygems.org'
@@ -395,6 +427,11 @@ $ ag -o "\'[\w-]+\'" Gemfile \
    zip-code-info
   ```
 ]
+---
+> Remember your notes?
+
+- Draw how the boundaries look like
+- You don't need to follow a specific methodology, just draw
 
 ---
 This is too manual, try [rubrowser](http://www.blazeboy.me/rubrowser/)
@@ -408,6 +445,8 @@ This is too manual, try [rubrowser](http://www.blazeboy.me/rubrowser/)
 I heard it from [Uncle Bob](http://programmer.97things.oreilly.com/wiki/index.php/The_Boy_Scout_Rule):
 
 > Always leave the campground cleaner than you found it.
+
+## Now let's figure out where to start
 ---
 
 
@@ -454,6 +493,7 @@ Classes
 
 ## reek
 > Reek is a tool that examines Ruby classes, modules and methods and reports any code smells it finds.
+
 ```bash
 $ reek --format json app/models/wishlist.rb
 ```
@@ -521,6 +561,7 @@ $ reek --format json app/models | jq '.[] .smell_type'| sort | uniq
 
 ## code_metrics
 > rake stats is great for looking at statistics on your code, displaying things like KLOCs (thousands of lines of code) and your code to test ratio.
+
 ```bash
 code_metrics
 +----------------------+-------+-------+---------+---------+-----+-------+
@@ -541,6 +582,7 @@ code_metrics
 
 ## rubocop
 > RuboCop is a Ruby static code analyzer. Out of the box it will enforce many of the guidelines outlined in the community [Ruby Style Guide](https://github.com/bbatsov/ruby-style-guide).
+
 ```bash
 $ rubocop --format json app/models > rubocop.json
 ```
@@ -618,8 +660,35 @@ lib/acts_as_voteable
 ---
 
 # 8. Understand your tests
+Try the following:
+- Squint test your files
+- Identity the [Subjet Under Test (SUT)](http://xunitpatterns.com/SUT.html)
+- Understand the test setup and dependencies
 
-# 9. Adopt a few core ideas
+And:
+- Find out the test coverage
+- Single Responsibility Principle also applies to tests
+
+Further reading:
+- There are [Test Smells](http://xunitpatterns.com/Test%20Smells.html)
+---
+
+# 9. Extract features
+> Often times changing code will get just hard, consider extracting features into a new app
+
+When:
+- Lack of documentation or outdated
+- Single test containing multiple SUT
+- Low coverage
+- Hard test setups
+- Slow test suite
+
+How:
+- Create a high level collaborative test suite, check [Specification by Example](https://en.wikipedia.org/wiki/Specification_by_example)
+- Bring enough code to make tests pass, iterate
+
+
+# 10. Adopt a few core ideas
 - Curiosity
 - Assess risk
 - Fear and courage
