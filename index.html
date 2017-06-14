@@ -43,6 +43,21 @@
       blockquote p {
         display: inline;
       }
+      .grayed-out {
+        color: lightgray;
+      }
+      .grayed-out strong {
+        color: black;
+      }
+      .mindmap img {
+        max-width: 60%;
+      }
+      .diagraming img {
+        max-width: 70%;
+      }
+      .rubrowser img {
+        max-width: 90%;
+      }
     </style>
   </head>
 
@@ -51,7 +66,6 @@
    <textarea id="source">
 
 class: center, middle
-
 # Approaching a Legacy System
 
 by Emmanuel Delgado
@@ -60,10 +74,9 @@ by Emmanuel Delgado
 My name is Emmanuel Delgado, I am a Software Developer and I work for modcloth.com.
 ---
 
-
 # Agenda
 
-1. Definition
+1. Definition and mindset
 2. Just look at the files
 3. Become a Git historian
 4. Look for documentation
@@ -80,33 +93,27 @@ and tools/code.
 ---
 
 
-# 1. Definition
+# 1. Definition and mindset
 
 ## Wikipedia definition
 > In computing, a legacy system is an **old** method, **technology**, **computer system**, or **application program**, "of, relating to, or being a previous or **outdated computer system**." Often a pejorative term, referencing a system as "legacy" means that it paved the way for the standards that would follow it. This can also imply that the system is out of date or **in need of replacement.**
 
-- Old
-- Technology
-- Computer System
-- Application Program
-- Outdated computer system
-- In need of replacement
-
-???
-- What is a Legacy System?
 ---
 
-# Get ready for an archeology trip
-> Start writing down notes of everything you are learning
+.grayed-out[
+  # 1. Definition and mindset
+]
 
+## Get ready for an archeology trip
+- Start writing down notes of everything you are learning
 - It does not have to be a book, keywords may be enough
 - Mind maps are great
+
+.center.mindmap[![](dev-plan.jpg)]
 ---
 
 # 2. Just look at the files
-> Look for clues on what the domain knowledge looks like
-
---
+- Use **ls** to look for clues on what the domain knowledge looks like:
 
 ```bash
 $ ls
@@ -117,7 +124,6 @@ Guardfile            app                  features             spec.acceptance
 Procfile             certs                lib                  vendor
 Procfile.development config               log
 ```
---
 
 ```bash
 $ ls app
@@ -126,18 +132,20 @@ controllers jobs        models      services    views
 ```
 ---
 
-Look deeper:
+.grayed-out[
+  # 2. Just look at the files
+]
+- Use **tree** to look deeper:
+
 ```bash
 $ tree app lib
 lib
-├── abstract_methods.rb
 ├── activate_toggle_switch.rb
 ├── active_merchant
 │   └── billing
 │       ├── braintree_mod_gateway.rb
 │       └── gateways
 │           └── modcloth_bogus.rb
-├── active_record_extensions.rb
 ├── active_record_selective_error_presenter.rb
 ├── active_shipping
 │   ├── active_shipping
@@ -147,110 +155,116 @@ lib
 ...
 └── wsdl
     ├── ShipServiceDevelopment_v9.wsdl
-    ├── ShipServiceDevelopment_v9.wsdl.bak
-    ├── ShipServiceProduction_v9.wsdl
-    └── ShipServiceProduction_v9.wsdl.bak
 
 504 directories, 3052 files
 ```
 ---
 
-Looks like rails and ruby so, how much ruby?:
-```bash
-$ ag -l 'class|module' --ruby | wc
-  3227    3227  157092
-```
---
+.grayed-out[
+  # 2. Just look at the files
+]
+- Use **ag**, **wc**. It looks like rails and ruby so, how much ruby?:
+  ```bash
+  $ ag -l 'class|module' --ruby | wc
+    3227    3227  157092
+  ```
 
-How much ruby in *lib* and *app*?:
-```bash
-$ ag -l 'class|module' --ruby  app lib |wc
-  1836    1836   79395
-```
---
+- How much ruby in *lib* and *app*?:
+  ```bash
+  $ ag -l 'class|module' --ruby  app lib |wc
+    1836    1836   79395
+  ```
 
-How many files types are there [thank you stackoverflow](https://stackoverflow.com/questions/1842254/how-can-i-find-all-of-the-distinct-file-extensions-in-a-folder-hierarchy)?
-```bash
-$ find . -type f \
-  | sed -e 's/.*\.//' \
-  | sed -e 's/.*\///' \
-  | sort | uniq -c | sort -rn| wc
-     217     434    3881
-```
+- How many files types are there [thank you stackoverflow](https://stackoverflow.com/questions/1842254/how-can-i-find-all-of-the-distinct-file-extensions-in-a-folder-hierarchy)?
+  ```bash
+  $ find . -type f \
+    | sed -e 's/.*\.//' \
+    | sed -e 's/.*\///' \
+    | sort | uniq -c | sort -rn| wc
+       217     434    3881
+  ```
 ---
 
-Top counts:
-```bash
-$ find . -type f \
-  | sed -e 's/.*\.//' \
-  | sed -e 's/.*\///' \
-  | sort | uniq -c | sort -rn
-  | head -n10
-3579 rb
-1634 png
- 829 js
- 775 erb
- 586 gif
- 547 jpg
- 511 haml
- 372 scss
- 248 gem
- 124 css
-  81 feature
-  77 rake
-  58 csv
-  52 yml
-  41 html
-  39 htm
-  38 xml
-  17 svg
-  16 woff
-  16 ttf
-```
+.grayed-out[
+  # 2. Just look at the files
+]
+- Use **find**, **sort**, **sed**, **uniq**, **head** to get the top counts per file type:
+  ```bash
+  $ find . -type f \
+    | sed -e 's/.*\.//' \
+    | sed -e 's/.*\///' \
+    | sort | uniq -c | sort -rn
+    | head -n10
+  3579 rb
+  1634 png
+   829 js
+   775 erb
+   586 gif
+   547 jpg
+   511 haml
+   372 scss
+   248 gem
+   124 css
+    81 feature
+    77 rake
+    58 csv
+    52 yml
+    41 html
+    39 htm
+    38 xml
+    17 svg
+  ```
 ---
 
 # 3. Become a Git historian
-```bash
-$ brew upgrade git-extras
-Error: git-extras 4.3.0 already installed
-$ git summary
-git summary |more
+- Use **git-extras** to get a summary of the project
+  ```bash
+  $ brew upgrade git-extras
+  Error: git-extras 4.3.0 already installed
+  $ git summary
+  git summary |more
 
- project  : e-comm
- repo age : 9 years
- active   : 2420 days
- commits  : 42828
- files    : 9942
- authors  :
-  1806  Person 1  4.2%
-  1566  Person 2  3.7%
-  1431  Person 3  3.3%
-  1218  Person 4  2.8%
-  1072  Person 5  2.5%
-   962  Person 6  2.2%
-   878  Person 7  2.1%
-   729  Person 8  1.7%
-   717  Person 9  1.7%
-   711  Person 10 1.7%
-   674  Person 11 1.6%
-```
+   project  : e-comm
+   repo age : 9 years
+   active   : 2420 days
+   commits  : 42828
+   files    : 9942
+   authors  :
+    1806  Person 1  4.2%
+    1566  Person 2  3.7%
+    1431  Person 3  3.3%
+    1218  Person 4  2.8%
+    1072  Person 5  2.5%
+     962  Person 6  2.2%
+     878  Person 7  2.1%
+     729  Person 8  1.7%
+     717  Person 9  1.7%
+     711  Person 10 1.7%
+     674  Person 11 1.6%
+  ```
 ---
 
-Aggregating the results a little bit:
-```bash
-git summary \
-  | ag -o '[a-zA-Z\s]+' \
-  | tr '[:upper:]' '[:lower:]' \
-  | ag -o '\w+(\s\w+)?' \
-  | sort | uniq| wc
-     325     522    3715
-```
-
+.grayed-out[
+  # 3. Become a Git historian
+]
+* Aggregate results with **ag**, **tr**, **sort**, **uniq** and **wc**
+  ```bash
+  git summary \
+    | ag -o '[a-zA-Z\s]+' \
+    | tr '[:upper:]' '[:lower:]' \
+    | ag -o '\w+(\s\w+)?' \
+    | sort | uniq| wc
+       325     522    3715
+  ```
 - You can also go to github in case it is stored in github
 - Or use the cool https://github.com/IonicaBizau/git-stats
 ---
 
-## Understand change on single objects
+.grayed-out[
+  # 3. Become a Git historian
+]
+- Understand change on single objects with **git log**:
+
 ```bash
 $ git log -patch --stat Gemfile
 commit ae961aee1ec7502f14f94e938b93c2b031547e39
@@ -276,27 +290,6 @@ gem 'oauth-plugin', '~> 0.4.1' # Need to specify the version or bundler will ins
 gem 'packet', '0.1.15'
 
 commit e7237329cd0c0629b660697bcdf69e9328258e54
-Author: Jorge X <x@place.com>
-Date:   Fri Aug 19 13:51:19 2016 -0700
-
-Update mc-fedex gem
----
-Gemfile | 2 +-
-1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/Gemfile b/Gemfile
-index 945873cd20..507ae3f1ee 100644
---- a/Gemfile
-+++ b/Gemfile
-@@ -56,7 +56,7 @@ gem 'resque-retry'
-gem 'redis', '~> 3'
-gem 'will_paginate'
-gem 'mc-settings', '0.1.6'
--gem 'mc-fedex', '0.2.0'
-+gem 'mc-fedex', git: 'https://7650f1f2b178ebdbcb4e8bee50414500036c1720@github.com/modcloth/mc-fedex.git'
-gem 'mc-taxonomy'
-gem 'typhoeus'
-gem 'compass'
 ```
 ---
 
@@ -310,23 +303,29 @@ As we look for documentation keep in mind:
 - Is there someone in the team that understand the system?
 ---
 
-Seems that we have a *doc* folder:
-```bash
-$ git whatchanged doc
-commit d2968ae8573095ed32676f11dbc3a97d77d0549d
-Author: Person X
-Date:   Wed Jun 11 12:58:30 2014 -0400
+.grayed-out[
+  # 4. Look for documentation
+]
+- Seems that we have a *doc* folder:
+  ```bash
+  $ git whatchanged doc
+  commit d2968ae8573095ed32676f11dbc3a97d77d0549d
+  Author: Person X
+  Date:   Wed Jun 11 12:58:30 2014 -0400
 
-    [SB] Delete random file?
+      [SB] Delete random file?
 
-:100644 000000 ab1b12981e... 0000000000... D    doc/obsolete/BCREC.csv
-```
+  :100644 000000 ab1b12981e... 0000000000... D    doc/obsolete/BCREC.csv
+  ```
 
-> Last document modified on 2014, so it's time to start your documentation.
+- The last document modified on 2014, so it's time to start your documentation.
+---
 
---
 
-Here are a few things to keep in mind:
+.grayed-out[
+  # 4. Look for documentation
+]
+## Here are a few things to keep in mind:
 
 - Document everything you learn.
 - Keep documentation close to the code, simple is better.
@@ -366,76 +365,84 @@ gem 'simple_form' #, github: 'plataformatec/simple_form', branch: 'v2.2' # admin
 ...
 ```
 ---
-A naive filter would give me a better idea:
-```bash
-$ ag -o "\'[\w-]+\'" Gemfile \
-  | tr "'" " " \
-  | sort \
-  | wc
-     188     188    2675
-```
-.left-column[
+
+.grayed-out[
+  # 5. Understand your boundaries
+]
+
+- A naive filter would give me a better idea:
   ```bash
   $ ag -o "\'[\w-]+\'" Gemfile \
     | tr "'" " " \
-    | sort
-   activemerchant
-   activerecord-import
-   activerecord-nulldb-adapter
-   acts-as-taggable-on
-   acts_as_list
-   addressable
-   airbrake
-   ambethia-smtp-tls
-   american_date
-   ancestry
-   ap
-   awesome_nested_set
-   awesome_print
-   aws-sdk
-   bartt-ssl_requirement
-   better_errors
-   bitly
-   braintree
-   builder
+    | sort \
+    | wc
+       188     188    2675
   ```
- ]
 
-.right-colum[
-  ```bash
-   capistrano
-   capistrano-ext
-   capybara
-   capybara-screenshot
-   capybara-webkit
-   chronic
-   codeclimate-test-reporter
-   colorize
-   compass
-   compass-rails
-   connection_pool
-   cookie_slasher
-   cucumber-rails
-   curb
-   ...
-   typhoeus
-   validates_timeliness
-   vcr
-   will_paginate
-   yajl-ruby
-   zendesk_remote_auth
-   zip-code-info
-  ```
-]
+  .left-column[
+    ```bash
+    $ ag -o "\'[\w-]+\'" Gemfile \
+      | tr "'" " " \
+      | sort
+     activemerchant
+     activerecord-import
+     activerecord-nulldb-adapter
+     acts-as-taggable-on
+     acts_as_list
+     addressable
+     airbrake
+     ambethia-smtp-tls
+     american_date
+     ancestry
+     ap
+     awesome_nested_set
+     awesome_print
+    ```
+   ]
+
+  .right-colum[
+    ```bash
+     capistrano
+     capistrano-ext
+     capybara
+     capybara-screenshot
+     capybara-webkit
+     chronic
+     codeclimate-test-reporter
+     colorize
+     compass
+     compass-rails
+     connection_pool
+     cookie_slasher
+     cucumber-rails
+     curb
+     ...
+     typhoeus
+     validates_timeliness
+    ```
+  ]
 ---
-> Remember your notes?
 
+.grayed-out[
+  # 5. Understand your boundaries
+]
+
+- Remember your notes
 - Draw how the boundaries look like
 - You don't need to follow a specific methodology, just draw
 
+.center.diagraming[![](diagraming.jpg)]
+
 ---
-This is too manual, try [rubrowser](http://www.blazeboy.me/rubrowser/)
-![](./sg-rubrowser.gif)
+
+
+.grayed-out[
+  # 5. Understand your boundaries
+]
+
+- Try [rubrowser](http://www.blazeboy.me/rubrowser/)
+
+.center.rubrowser[![](sg-rubrowser.gif)]
 
 ???
 - Pending what do you understand from rubrowser?
@@ -446,7 +453,8 @@ I heard it from [Uncle Bob](http://programmer.97things.oreilly.com/wiki/index.ph
 
 > Always leave the campground cleaner than you found it.
 
-## Now let's figure out where to start
+- Excuses are many, get over them
+- Now let's figure out where to start
 ---
 
 
@@ -460,7 +468,10 @@ There is [metric_fu](https://github.com/metricfu/metric_fu), but let's take a lo
 - [unused](https://github.com/joshuaclayton/unused)
 ---
 
-## churn
+.grayed-out[
+  # 7. Static analysis tools - **churn**
+]
+
 > High method and class churn has been shown to have increased bug and error rates ...
 
 ```bash
@@ -491,7 +502,10 @@ Classes
 ```
 ---
 
-## reek
+.grayed-out[
+  # 7. Static analysis tools - **reek**
+]
+
 > Reek is a tool that examines Ruby classes, modules and methods and reports any code smells it finds.
 
 ```bash
@@ -527,39 +541,47 @@ $ reek --format json app/models/wishlist.rb
 ```
 ---
 
+.grayed-out[
+  # 7. Static analysis tools - **reek**
+]
+
 You could quickly look for what code smells there are in a bunch of files, just to see how
 stinky the code base is:
-```bash
-$ reek --format json app/models | jq '.[] .smell_type'| sort | uniq
-"Attribute"
-"BooleanParameter"
-"ClassVariable"
-"ControlParameter"
-"DataClump"
-"DuplicateMethodCall"
-"FeatureEnvy"
-"InstanceVariableAssumption"
-"IrresponsibleModule"
-"LongParameterList"
-"ManualDispatch"
-"NestedIterators"
-"NilCheck"
-"PrimaDonnaMethod"
-"RepeatedConditional"
-"TooManyConstants"
-"TooManyInstanceVariables"
-"TooManyMethods"
-"TooManyStatements"
-"UncommunicativeMethodName"
-"UncommunicativeParameterName"
-"UncommunicativeVariableName"
-"UnusedParameters"
-"UtilityFunction"
-```
+
+  ```bash
+  $ reek --format json app/models | jq '.[] .smell_type'| sort | uniq
+  "Attribute"
+  "BooleanParameter"
+  "ClassVariable"
+  "ControlParameter"
+  "DataClump"
+  "DuplicateMethodCall"
+  "FeatureEnvy"
+  "InstanceVariableAssumption"
+  "IrresponsibleModule"
+  "LongParameterList"
+  "ManualDispatch"
+  "NestedIterators"
+  "NilCheck"
+  "PrimaDonnaMethod"
+  "RepeatedConditional"
+  "TooManyConstants"
+  "TooManyInstanceVariables"
+  "TooManyMethods"
+  "TooManyStatements"
+  "UncommunicativeMethodName"
+  "UncommunicativeParameterName"
+  "UncommunicativeVariableName"
+  "UnusedParameters"
+  "UtilityFunction"
+  ```
 
 ---
 
-## code_metrics
+.grayed-out[
+  # 7. Static analysis tools - **code_metrics**
+]
+
 > rake stats is great for looking at statistics on your code, displaying things like KLOCs (thousands of lines of code) and your code to test ratio.
 
 ```bash
@@ -580,7 +602,10 @@ code_metrics
 ```
 ---
 
-## rubocop
+.grayed-out[
+  # 7. Static analysis tools - **rubocop**
+]
+
 > RuboCop is a Ruby static code analyzer. Out of the box it will enforce many of the guidelines outlined in the community [Ruby Style Guide](https://github.com/bbatsov/ruby-style-guide).
 
 ```bash
@@ -622,15 +647,22 @@ $ rubocop --format json app/models > rubocop.json
 ```
 ---
 
-Again we could get all the severities for researching purposes:
-```bash
-$ cat rubocop.json | jq '.files[].offenses[].severity' | sort | uniq -c
-7380 "convention"
- 215 "warning"
-```
+.grayed-out[
+  # 7. Static analysis tools - **rubocop**
+]
+
+- Again we could get all the severities for researching purposes:
+  ```bash
+  $ cat rubocop.json | jq '.files[].offenses[].severity' | sort | uniq -c
+  7380 "convention"
+   215 "warning"
+  ```
 ---
 
-## Bonus: unused
+.grayed-out[
+  # 7. Static analysis tools - **unused**
+]
+
 ```bash
 lib/acts_as_customizable
      custom_field_values=        ...able/acts_as_customizable.rb    occurs once
@@ -686,7 +718,7 @@ When:
 How:
 - Create a high level collaborative test suite, check [Specification by Example](https://en.wikipedia.org/wiki/Specification_by_example)
 - Bring enough code to make tests pass, iterate
-
+---
 
 # 10. Adopt a few core ideas
 - Curiosity
@@ -707,12 +739,21 @@ How:
 ---
 
 # Thank you
+Emmanuel as **chischaschos** at:
+- [twitter](https://twitter.com/chischaschos)
+- [github](https://github.com/chischaschos)
+- [almost empty blog](https://chischaschos.github.io)
+- [my email](mailto: larin.s931@gmail.com)
 
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js" type="text/javascript">
     </script>
     <script type="text/javascript">
-      var slideshow = remark.create();
+      var slideshow = remark.create({
+        <!-- highlightStyle: 'solarized-dark' -->
+        highlightStyle: 'solarized-light',
+        highlightLines: true,
+      });
     </script>
   </body>
 </html>
